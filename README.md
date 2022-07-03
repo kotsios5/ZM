@@ -1,64 +1,45 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Zap-Map Technical Challenge
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+For this challenge I've used Laravel v9.19, PHP 8.1.7 and MySQL 5.7.
 
-## About Laravel
+In order to save the locations into the database, I've created the database schema with:
+<code>database\migrations\2022_07_02_172434_create_locations_table.php</code>
+the Location model:
+<code>app\Models\Location.php</code>
+validating the request's parameters with:
+<code>app\Http\Requests\GetLocationsRequest.php</code>
+and using the following controller to get the locations that fall within the given radius:
+<code>app/Http/Controllers/V1/LocationController.php</code>
+The definition of the route is in <code>routes/api.php</code>. The post locations route is inside the v1 group for maintainability even if it wasn't required for this challenge. 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The <code>LocationController::getLocations()</code> is called when we make a request, which is calling the protected function <code>LocationController::getDistanceFromCurrentLocation()</code> to calculate and return the distance between the given coordinates and each of the locations in the database. If the returned distance falls into the given radius, the location is added to an array which is returned as a response.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<code>POST</code> /api/v1/locations/?latitude={lat}&longitude={long}&radius={radius}
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Example with Postman:
 
-## Learning Laravel
+Request:
+```
+POST /api/v1/locations/?latitude=51&longitude=-2&radius=50 HTTP/1.1
+Host: localhost
+Accept: application/json
+Content-Type: application/json
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Response:
+```
+[
+    {
+        "id": 23,
+        "name": "6 Nansen Road",
+        "latitude": "51.41743187735718000000",
+        "longitude": "-1.98512655633443910000"
+    },
+    {
+        "id": 113,
+        "name": "Fitzroy Court",
+        "latitude": "51.41198069577813400000",
+        "longitude": "-1.99404862818395420000"
+    }
+]
+``` 
